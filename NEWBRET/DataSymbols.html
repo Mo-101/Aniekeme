@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Display a map on a webpage</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        #nav-menu {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            height: 34px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: left;
+            gap: 10px;
+            color: white;
+            max-width: calc(100% - 20px);
+            overflow: hidden;
+            z-index: 1; /* Ensure the navigation menu is above the map */
+        }
+        .nav-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: center;
+        }
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        .nav-item:active {
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+        }
+
+        h2,h3 {
+        margin: 10px;
+        font-size: 18px;
+      }
+
+      h3 {
+        font-size: 16px;
+      }
+
+      p {
+        margin: 10px;
+      }
+
+      .map-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: #fff;
+        margin-right: 20px;
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+      }
+      #features {
+        top: 0;
+        height: 100px;
+        margin-top: 20px;
+        width: 250px;
+      }
+
+      #legend {
+        padding: 10px;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+        line-height: 18px;
+        height: auto;
+        margin-bottom: 40px;
+        width: 150px;
+      }
+
+      .legend-key {
+        display: inline-block;
+        border-radius: 20%;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+      }
+    </style>
+</head>
+<body>
+  <div id="nav-menu">
+    <a href="Home.html" class="nav-item">Home</a>
+    <a href="HeatMap.html" class="nav-item">Heat Map</a>
+    <a href="DataCircles.html" class="nav-item">Data Circles</a>
+    <a href="PredictiveAnalysis.html" class="nav-item">Analytics Page</a>
+</div>
+  <div id="map"></div>
+        <div class="map-overlay" id="features">
+        <h2>IPC Level Readiness</h2>
+        <div id="pd"><p>Hover over an area!</p></div>
+    </div>
+        <div id="map"></div>   
+        <div class="map-overlay" id="legend"></div>
+  </div>
+</body> 
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2x4czNxbjU2MWM2eTJqc2gwNGIwaWhkMSJ9.jSwZdyaPa1dOHepNU5P71g';
+        const map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/akanimo1/clxyfobxi001501qrccvi91xk', // style
+            center: [3.9050605, 7.38691745], // starting position [lng, lat]
+            pitch: 45,
+            zoom: 12 
+          });
+            // Wait for map to load before adjusting it
+            map.on('load', () => {
+            // Make a pointer cursor
+            map.getCanvas().style.cursor = 'default';
+
+        // Define IPC levels and their corresponding colors
+        const ipcLevels = ['Advanced', 'Intermediate', 'Basic', 'Inadequate'];
+        const colors = ['#00FF00', '#FFFF00', '#0000FF', '#FF0000'];
+
+        // Create legend
+        const legend = document.getElementById('legend');
+
+        ipcLevels.forEach((level, i) => {
+          const color = colors[i];
+          const item = document.createElement('div');
+          const key = document.createElement('span');
+          key.className = 'legend-key';
+          key.style.backgroundColor = color;
+
+          const value = document.createElement('span');
+          value.innerHTML = `${level}`;
+          item.appendChild(key);
+          item.appendChild(value);
+          legend.appendChild(item);
+        });
+
+        // Change info window on hover
+        map.on('mousemove', (event) => {
+          const areas = map.allFacilities(event.point, {
+            layers: ['ipclevel']
+          });
+          document.getElementById('pd').innerHTML = areas.length
+            ? `<h3>${areas[0].properties.name}</h3><p><strong><em>${areas[0].properties.level}</strong></em></p>`
+            : `<p>Hover over an area!</p>`;
+        });
+      });
+    </script>
+  </body>
+</html>
